@@ -3,7 +3,9 @@ import {
   extractReasoningMiddleware,
   wrapLanguageModel,
 } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { xai } from '@ai-sdk/xai';
+import { openai } from '@ai-sdk/openai';
 import { isTestEnvironment } from '../constants';
 import {
   artifactModel,
@@ -11,6 +13,10 @@ import {
   reasoningModel,
   titleModel,
 } from './models.test';
+
+const openaiProvider = createOpenAI({
+  baseURL: 'http://localhost:8000',
+});
 
 export const myProvider = isTestEnvironment
   ? customProvider({
@@ -23,15 +29,15 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model': xai('grok-2-vision-1212'),
+        'chat-model': openaiProvider.chat('gpt-4o-mini'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: xai('grok-3-mini-beta'),
+          model: openai.responses('gpt-4o-mini'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
-        'title-model': xai('grok-2-1212'),
-        'artifact-model': xai('grok-2-1212'),
+        'title-model': openai.responses('gpt-4o-mini'),
+        'artifact-model': openai.responses('gpt-4o-mini'),
       },
       imageModels: {
-        'small-model': xai.image('grok-2-image'),
+        'small-model': openai.image('dall-e-3'),
       },
     });

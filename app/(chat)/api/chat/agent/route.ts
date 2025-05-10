@@ -20,7 +20,7 @@ import {
   saveMessages,
 } from '@/lib/db/queries';
 import { generateUUID, getTrailingMessageId } from '@/lib/utils';
-import { generateTitleFromUserMessage } from '../../actions';
+import { generateTitleFromUserMessage } from '../../../actions';
 import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
@@ -29,7 +29,7 @@ import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
-import { postRequestBodySchema, type PostRequestBody } from './schema';
+import { postRequestBodySchema, type PostRequestBody } from '../schema';
 import { geolocation } from '@vercel/functions';
 import {
   createResumableStreamContext,
@@ -41,12 +41,7 @@ import { differenceInSeconds } from 'date-fns';
 
 const provider = createOpenAICompatible({
   name: 'fastapi-backend',
-  baseURL: 'http://localhost:8000',
-});
-
-const wrappedProvider = wrapLanguageModel({
-  model: provider('gpt-4.1-mini'),
-  middleware: [fastapiStreamMiddleware],
+  baseURL: 'http://localhost:8000/api/chat/completions',
 });
 
 export const maxDuration = 60;
@@ -164,7 +159,7 @@ export async function POST(request: Request) {
     const stream = createDataStream({
       execute: (dataStream) => {
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
+          model: provider('example'),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages,
           maxSteps: 5,
