@@ -30,7 +30,14 @@ export function ModelSelector({
     useOptimistic(selectedModelId);
 
   const userType = session.user.type;
-  const { availableChatModelIds } = entitlementsByUserType[userType];
+
+  // 🚨 Log unexpected user types
+  if (!entitlementsByUserType[userType]) {
+    console.warn(`Unknown user type: ${userType}`);
+  }
+
+  const { availableChatModelIds } =
+    entitlementsByUserType[userType] ?? entitlementsByUserType.guest;
 
   const availableChatModels = chatModels.filter((chatModel) =>
     availableChatModelIds.includes(chatModel.id),
